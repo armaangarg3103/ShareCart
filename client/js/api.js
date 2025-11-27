@@ -78,10 +78,15 @@ class APIClient {
         return data;
     }
 
-    async login(email, password) {
+    async login(credentials) {
+        // Support both formats: login({email, password}) or login(email, password)
+        const loginData = typeof credentials === 'object' 
+            ? credentials 
+            : { email: credentials, password: arguments[1] };
+            
         const data = await this.request('/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify(loginData)
         });
         
         if (data.success) {
