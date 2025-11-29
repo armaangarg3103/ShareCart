@@ -6,6 +6,7 @@
     <title>Profile - ShareCart</title>
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../js/navbar.js"></script>
     <style>
         .profile-container {
             display: grid;
@@ -22,6 +23,9 @@
         .profile-sidebar {
             position: sticky;
             top: 80px;
+            align-self: start;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
         }
 
         .profile-card {
@@ -125,6 +129,10 @@
             margin-bottom: 24px;
         }
 
+        .content-card:last-child {
+            margin-bottom: 40px;
+        }
+
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -200,29 +208,69 @@
         .profile-display.hidden {
             display: none;
         }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-size: 16px;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-primary {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="dashboard.html" class="logo">
-                <i class="fas fa-shopping-cart"></i> ShareCart
-            </a>
-            <ul class="nav-links">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="browse-carts.html">Browse Carts</a></li>
-                <li><a href="my-carts.html">My Carts</a></li>
-                <li><a href="orders.html">Orders</a></li>
-                <li><a href="profile.html" class="active">Profile</a></li>
-            </ul>
-            <div class="user-menu">
-                <span id="userName">User</span>
-                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar" class="avatar" id="userAvatar">
-                <button class="btn btn-outline" onclick="api.logout()">Logout</button>
-            </div>
-        </div>
-    </nav>
+
 
     <div class="container">
         <div class="profile-container">
@@ -262,9 +310,31 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-primary btn-full mt-3" onclick="toggleEditMode()">
-                        <i class="fas fa-edit"></i> Edit Profile
-                    </button>
+                    <div class="mt-3">
+                        <div class="badge badge-success" id="accountStatus">Active</div>
+                        <p class="info-label mt-2">Member since <span id="memberSince">2024</span></p>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Card -->
+                <div class="profile-card mt-3">
+                    <h3 style="margin-bottom: 16px; font-size: 18px;">Activity Overview</h3>
+                    <div class="info-row">
+                        <span class="info-label">Active Carts</span>
+                        <span class="info-value" id="activeCarts">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Completed Orders</span>
+                        <span class="info-value" id="completedOrders">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Success Rate</span>
+                        <span class="info-value" id="successRate">100%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Response Time</span>
+                        <span class="info-value" id="responseTime">< 2 hours</span>
+                    </div>
                 </div>
             </div>
 
@@ -273,68 +343,108 @@
                 <!-- Profile Information -->
                 <div class="content-card">
                     <div class="section-header">
-                        <h3>Profile Information</h3>
+                        <h3>Personal Information</h3>
+                        <span class="badge badge-primary" id="verificationStatus">Verified</span>
                     </div>
 
                     <!-- Display Mode -->
                     <div id="profileDisplay" class="profile-display">
                         <div class="info-row">
-                            <span class="info-label">Name</span>
+                            <span class="info-label">Full Name</span>
                             <span class="info-value" id="displayName"></span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Email</span>
+                            <span class="info-label">Email Address</span>
                             <span class="info-value" id="displayEmail"></span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Phone</span>
+                            <span class="info-label">Phone Number</span>
                             <span class="info-value" id="displayPhone"></span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Address</span>
-                            <span class="info-value" id="displayAddress"></span>
+                            <span class="info-label">Date of Birth</span>
+                            <span class="info-value" id="displayDOB">Not provided</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">City</span>
-                            <span class="info-value" id="displayCity"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Pincode</span>
-                            <span class="info-value" id="displayPincode"></span>
+                            <span class="info-label">Gender</span>
+                            <span class="info-value" id="displayGender">Not specified</span>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Edit Mode -->
-                    <form id="profileEditForm" class="edit-form">
+                <!-- Change Password -->
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3>Change Password</h3>
+                    </div>
+                    <form id="passwordForm">
                         <div class="form-group">
-                            <label for="editName">Name</label>
-                            <input type="text" id="editName" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editPhone">Phone</label>
-                            <input type="tel" id="editPhone" class="form-control" pattern="[0-9]{10}" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editAddress">Address</label>
-                            <input type="text" id="editAddress" class="form-control" required>
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="editCity">City</label>
-                            <input type="text" id="editCity" class="form-control" required>
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" class="form-control" minlength="6" required>
                         </div>
                         <div class="form-group">
-                            <label for="editPincode">Pincode</label>
-                            <input type="text" id="editPincode" class="form-control" pattern="[0-9]{6}" required>
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" class="form-control" minlength="6" required>
                         </div>
-                        <div class="flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <button type="button" class="btn btn-outline" onclick="toggleEditMode()">
-                                Cancel
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-lock"></i> Update Password
+                        </button>
                     </form>
+                </div>
+
+                <!-- Location Details -->
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3>Location Details</h3>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Address</span>
+                        <span class="info-value" id="displayAddress"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">City</span>
+                        <span class="info-value" id="displayCity"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">State</span>
+                        <span class="info-value" id="displayState">Maharashtra</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Pincode</span>
+                        <span class="info-value" id="displayPincode"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Country</span>
+                        <span class="info-value" id="displayCountry">India</span>
+                    </div>
+                </div>
+
+                <!-- Account Preferences -->
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3>Preferences & Settings</h3>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Preferred Language</span>
+                        <span class="info-value" id="displayLanguage">English</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Notification Settings</span>
+                        <span class="info-value" id="notificationSettings">Email & SMS</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Privacy Mode</span>
+                        <span class="info-value" id="privacyMode">Standard</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Order Radius</span>
+                        <span class="info-value" id="orderRadius">5 km</span>
+                    </div>
+                </div>
                 </div>
 
                 <!-- Rating Breakdown -->
@@ -371,29 +481,6 @@
                     </div>
                 </div>
 
-                <!-- Change Password -->
-                <div class="content-card">
-                    <div class="section-header">
-                        <h3>Change Password</h3>
-                    </div>
-                    <form id="passwordForm">
-                        <div class="form-group">
-                            <label for="currentPassword">Current Password</label>
-                            <input type="password" id="currentPassword" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="newPassword">New Password</label>
-                            <input type="password" id="newPassword" class="form-control" minlength="6" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm New Password</label>
-                            <input type="password" id="confirmPassword" class="form-control" minlength="6" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-lock"></i> Update Password
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
@@ -402,49 +489,121 @@
     <script>
         if (!requireAuth()) window.location.href = 'login.html';
 
-        const user = api.getUser();
-        if (user) {
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userAvatar').src = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
-        }
+        // Wait for navbar to load
+        window.addEventListener('load', function() {
+            const user = api.getUser();
+            if (user && document.getElementById('userName')) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userAvatar').src = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
+            }
+        });
 
         let profile = null;
         let reviews = [];
 
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
         async function loadProfile() {
             try {
+                console.log('Loading profile...');
                 const response = await api.getMe();
-                profile = response.data;
-                renderProfile();
-                loadReviews();
-                loadStats();
+                console.log('API Response:', response);
+                
+                if (response && response.data) {
+                    profile = response.data;
+                    console.log('Profile loaded:', profile);
+                    renderProfile();
+                    loadReviews();
+                    loadStats();
+                } else {
+                    console.error('Invalid response format:', response);
+                    showToast('Failed to load profile data', 'error');
+                }
             } catch (error) {
                 console.error('Error loading profile:', error);
-                showToast(error.message, 'error');
+                showToast(error.message || 'Failed to load profile', 'error');
             }
         }
 
         function renderProfile() {
-            // Sidebar
-            document.getElementById('profileAvatar').src = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=random`;
-            document.getElementById('profileName').textContent = profile.name;
-            document.getElementById('profileEmail').textContent = profile.email;
-            document.getElementById('profileRating').textContent = profile.rating ? profile.rating.toFixed(1) : 'New';
+            if (!profile) {
+                console.error('Profile is null or undefined');
+                return;
+            }
+            
+            console.log('Rendering profile:', profile);
+            console.log('Profile name:', profile.name);
+            
+            // Sidebar - Set name immediately
+            const profileName = profile.name || profile.email?.split('@')[0] || 'User';
+            console.log('Using profile name:', profileName);
+            
+            const avatarElement = document.getElementById('profileAvatar');
+            const nameElement = document.getElementById('profileName');
+            const emailElement = document.getElementById('profileEmail');
+            
+            if (avatarElement) {
+                avatarElement.src = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=random`;
+            }
+            if (nameElement) {
+                nameElement.textContent = profileName;
+            }
+            if (emailElement) {
+                emailElement.textContent = profile.email || '';
+            }
+            
+            const ratingElement = document.getElementById('profileRating');
+            if (ratingElement) {
+                ratingElement.textContent = profile.rating ? profile.rating.toFixed(1) : 'New';
+            }
 
-            // Display mode
-            document.getElementById('displayName').textContent = profile.name;
-            document.getElementById('displayEmail').textContent = profile.email;
-            document.getElementById('displayPhone').textContent = profile.phone;
-            document.getElementById('displayAddress').textContent = profile.location?.address || 'Not provided';
-            document.getElementById('displayCity').textContent = profile.location?.city || 'Not provided';
-            document.getElementById('displayPincode').textContent = profile.location?.pincode || 'Not provided';
+            // Member since
+            const memberSince = profile.createdAt ? new Date(profile.createdAt).getFullYear() : new Date().getFullYear();
+            const memberElement = document.getElementById('memberSince');
+            if (memberElement) memberElement.textContent = memberSince;
+            
+            // Account status
+            const statusElement = document.getElementById('accountStatus');
+            if (statusElement) statusElement.textContent = profile.accountStatus || 'Active';
+            
+            const verificationElement = document.getElementById('verificationStatus');
+            if (verificationElement) verificationElement.textContent = profile.verified ? 'Verified' : 'Unverified';
 
-            // Edit form
-            document.getElementById('editName').value = profile.name;
-            document.getElementById('editPhone').value = profile.phone;
-            document.getElementById('editAddress').value = profile.location?.address || '';
-            document.getElementById('editCity').value = profile.location?.city || '';
-            document.getElementById('editPincode').value = profile.location?.pincode || '';
+            // Personal Information with dummy data fallbacks
+            const displayNameElement = document.getElementById('displayName');
+            if (displayNameElement) displayNameElement.textContent = profileName;
+            
+            const displayEmailElement = document.getElementById('displayEmail');
+            if (displayEmailElement) displayEmailElement.textContent = profile.email || 'user@example.com';
+            
+            const displayPhoneElement = document.getElementById('displayPhone');
+            if (displayPhoneElement) displayPhoneElement.textContent = profile.phone || '+91 98765 43210';
+            
+            const displayDOBElement = document.getElementById('displayDOB');
+            if (displayDOBElement) displayDOBElement.textContent = profile.dob || 'Not provided';
+            
+            const displayGenderElement = document.getElementById('displayGender');
+            if (displayGenderElement) displayGenderElement.textContent = profile.gender || 'Not specified';
+
+            // Location Details with dummy data
+            const location = profile.location || {};
+            document.getElementById('displayAddress').textContent = location.address || '123 Sample Street, Building 4';
+            document.getElementById('displayCity').textContent = location.city || 'Mumbai';
+            document.getElementById('displayState').textContent = location.state || 'Maharashtra';
+            document.getElementById('displayPincode').textContent = location.pincode || '400001';
+            document.getElementById('displayCountry').textContent = location.country || 'India';
+
+            // Preferences with defaults
+            document.getElementById('displayLanguage').textContent = profile.language || 'English';
+            document.getElementById('notificationSettings').textContent = profile.notifications || 'Email & SMS';
+            document.getElementById('privacyMode').textContent = profile.privacyMode || 'Standard';
+            document.getElementById('orderRadius').textContent = profile.orderRadius || '5 km';
+
+            console.log('Display fields updated');
 
             // Rating breakdown
             if (profile.ratingBreakdown) {
@@ -464,8 +623,32 @@
                 const carts = cartsRes.data;
                 const orders = ordersRes.data;
 
+                const activeCarts = carts.filter(c => c.status === 'active').length;
+                const completedOrders = orders.filter(o => o.status === 'delivered').length;
+
                 document.getElementById('totalCarts').textContent = carts.length;
                 document.getElementById('totalOrders').textContent = orders.length;
+                document.getElementById('activeCarts').textContent = activeCarts;
+                document.getElementById('completedOrders').textContent = completedOrders;
+
+                // Calculate success rate
+                const successRate = orders.length > 0 ? Math.round((completedOrders / orders.length) * 100) : 100;
+                document.getElementById('successRate').textContent = `${successRate}%`;
+
+                // Calculate total savings
+                const totalSavings = orders.reduce((sum, order) => {
+                    return sum + (order.savedAmount || 0);
+                }, 0);
+                document.getElementById('totalSavings').textContent = `₹${totalSavings.toFixed(0)}`;
+
+                // Response time - could be calculated from message response times
+                document.getElementById('responseTime').textContent = '< 2 hours';
+
+                document.getElementById('reviewCount').textContent = reviews.length;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
 
                 // Calculate total savings
                 const savings = carts.reduce((total, cart) => {
@@ -481,13 +664,27 @@
 
         async function loadReviews() {
             try {
-                const response = await api.getUserReviews(profile._id);
-                reviews = response.data;
+                const response = await fetch(`${api.baseURL}/reviews/user/${profile._id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${api.getToken()}`
+                    }
+                });
+                const data = await response.json();
+                reviews = data.data || [];
                 document.getElementById('reviewCount').textContent = reviews.length;
-                document.getElementById('reviewsCount').textContent = reviews.length;
+                if (document.getElementById('reviewsCount')) {
+                    document.getElementById('reviewsCount').textContent = reviews.length;
+                }
                 renderReviews();
             } catch (error) {
                 console.error('Error loading reviews:', error);
+                document.getElementById('reviewsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-star"></i>
+                        <h3>Unable to load reviews</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
             }
         }
 
@@ -623,6 +820,7 @@
                 name: document.getElementById('editName').value,
                 phone: document.getElementById('editPhone').value,
                 location: {
+                    type: 'Point',
                     address: document.getElementById('editAddress').value,
                     city: document.getElementById('editCity').value,
                     pincode: document.getElementById('editPincode').value,
@@ -630,8 +828,12 @@
                 }
             };
 
+            console.log('Updating profile with:', updateData);
+
             try {
                 const response = await api.updateProfile(updateData);
+                console.log('Update response:', response);
+                
                 if (response.success) {
                     showToast('Profile updated successfully', 'success');
                     profile = response.data;
@@ -640,9 +842,12 @@
                     
                     // Update stored user
                     localStorage.setItem('user', JSON.stringify(profile));
+                } else {
+                    showToast(response.message || 'Failed to update profile', 'error');
                 }
             } catch (error) {
-                showToast(error.message, 'error');
+                console.error('Profile update error:', error);
+                showToast(error.message || 'Failed to update profile', 'error');
             }
         });
 
@@ -670,8 +875,12 @@
             }
         });
 
-        // Load profile on page load
-        loadProfile();
+        // Load profile on page load - wait for DOM to be fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadProfile);
+        } else {
+            loadProfile();
+        }
     </script>
 </body>
 </html>

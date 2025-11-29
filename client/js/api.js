@@ -5,6 +5,7 @@ const SOCKET_URL = 'http://localhost:5000';
 // API Client
 class APIClient {
     constructor() {
+        this.baseURL = API_BASE_URL;
         this.token = localStorage.getItem('token');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
     }
@@ -44,13 +45,23 @@ class APIClient {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
 
+        console.log('API Request:', {
+            url: `${API_BASE_URL}${endpoint}`,
+            method: options.method || 'GET',
+            headers: headers,
+            body: options.body
+        });
+
         try {
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 ...options,
                 headers
             });
 
+            console.log('API Response Status:', response.status, response.statusText);
+
             const data = await response.json();
+            console.log('API Response Data:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || data.error || 'Request failed');

@@ -106,39 +106,42 @@ exports.getUserReviews = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(50);
 
-    // Hide reviewer info for anonymous reviews
+    // Format reviews for response
     const formattedReviews = reviews.map(review => {
-      if (review.isAnonymous) {
-        return {
-          ...review.toObject(),
-          reviewer: {
-            name: 'Anonymous',
-            avatar: 'https://via.placeholder.com/150'
-          }
-        };
+      const reviewObj = review.toObject();
+      
+      // Calculate overall rating from categories if not present
+      if (!reviewObj.rating && reviewObj.categories) {
+        reviewObj.overallRating = (
+          reviewObj.categories.punctuality +
+          reviewObj.categories.communication +
+          reviewObj.categories.reliability
+        ) / 3;
+      } else {
+        reviewObj.overallRating = reviewObj.rating;
       }
-      return review;
-    });
 
-    // Calculate category averages
-    const categoryStats = await Review.aggregate([
-      { $match: { reviewee: mongoose.Types.ObjectId(req.params.userId) } },
-      {
-        $group: {
-          _id: null,
-          avgPunctuality: { $avg: '$categories.punctuality' },
-          avgCommunication: { $avg: '$categories.communication' },
-          avgReliability: { $avg: '$categories.reliability' },
-          totalReviews: { $sum: 1 }
-        }
+      // Add individual category ratings
+      reviewObj.punctuality = reviewObj.categories?.punctuality || 5;
+      reviewObj.communication = reviewObj.categories?.communication || 5;
+      reviewObj.reliability = reviewObj.categories?.reliability || 5;
+
+      // Handle anonymous reviews
+      if (reviewObj.isAnonymous) {
+        reviewObj.reviewer = {
+          name: 'Anonymous',
+          avatar: 'https://ui-avatars.com/api/?name=A&background=cccccc'
+        };
+        reviewObj.anonymous = true;
       }
-    ]);
+
+      return reviewObj;
+    });
 
     res.status(200).json({
       success: true,
       count: reviews.length,
-      data: formattedReviews,
-      stats: categoryStats[0] || null
+      data: formattedReviews
     });
   } catch (error) {
     res.status(500).json({

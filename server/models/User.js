@@ -68,6 +68,26 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  ratingBreakdown: {
+    punctuality: {
+      type: Number,
+      default: 5.0,
+      min: 1,
+      max: 5
+    },
+    communication: {
+      type: Number,
+      default: 5.0,
+      min: 1,
+      max: 5
+    },
+    reliability: {
+      type: Number,
+      default: 5.0,
+      min: 1,
+      max: 5
+    }
+  },
   totalOrders: {
     type: Number,
     default: 0

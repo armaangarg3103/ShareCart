@@ -1,0 +1,245 @@
+<style>
+    .navbar {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .navbar-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 70px;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: var(--dark);
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .navbar-brand i {
+        color: var(--primary-color);
+        font-size: 28px;
+    }
+
+    .navbar-menu {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar-menu a {
+        text-decoration: none;
+        color: var(--dark);
+        font-weight: 500;
+        transition: color 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .navbar-menu a:hover,
+    .navbar-menu a.active {
+        color: var(--primary-color);
+    }
+
+    .navbar-user {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        padding: 12px;
+        min-width: 200px;
+        display: none;
+        z-index: 1001;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: var(--dark);
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+
+    .dropdown-menu a:hover {
+        background: var(--light-gray);
+    }
+
+    .dropdown-menu .divider {
+        height: 1px;
+        background: var(--light-gray);
+        margin: 8px 0;
+    }
+
+    .mobile-menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--dark);
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .navbar-menu {
+            position: fixed;
+            top: 70px;
+            left: -100%;
+            width: 100%;
+            background: white;
+            flex-direction: column;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transition: left 0.3s;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .navbar-menu.show {
+            left: 0;
+        }
+
+        .mobile-menu-toggle {
+            display: block;
+        }
+    }
+</style>
+
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="dashboard.html" class="navbar-brand">
+            <i class="fas fa-shopping-cart"></i>
+            <span>ShareCart</span>
+        </a>
+
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <ul class="navbar-menu" id="navbarMenu">
+            <li><a href="dashboard.html" id="nav-dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="shop.html" id="nav-shop"><i class="fas fa-store"></i> Shop</a></li>
+            <li><a href="browse-carts.html" id="nav-browse"><i class="fas fa-search"></i> Browse Carts</a></li>
+            <li><a href="my-carts.html" id="nav-my-carts"><i class="fas fa-shopping-bag"></i> My Carts</a></li>
+            <li><a href="shared-carts.html" id="nav-shared"><i class="fas fa-users"></i> Shared Carts</a></li>
+            <li><a href="orders.html" id="nav-orders"><i class="fas fa-receipt"></i> Orders</a></li>
+            <li><a href="profile.html" id="nav-profile"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="#" onclick="logout(); return false;" id="nav-logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+
+        <div class="navbar-user">
+            <div class="dropdown">
+                <div class="user-avatar" onclick="toggleDropdown()">
+                    <span id="userInitial">U</span>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="profile.html">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                    <div class="divider"></div>
+                    <a href="#" onclick="logout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Set active nav item based on current page
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentPage = window.location.pathname.split('/').pop();
+        const navLinks = {
+            'dashboard.html': 'nav-dashboard',
+            'shop.html': 'nav-shop',
+            'browse-carts.html': 'nav-browse',
+            'my-carts.html': 'nav-my-carts',
+            'shared-carts.html': 'nav-shared',
+            'orders.html': 'nav-orders',
+            'profile.html': 'nav-profile'
+        };
+
+        if (navLinks[currentPage]) {
+            document.getElementById(navLinks[currentPage])?.classList.add('active');
+        }
+
+        // Set user initial
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            document.getElementById('userInitial').textContent = user.name.charAt(0).toUpperCase();
+        }
+    });
+
+    function toggleDropdown() {
+        document.getElementById('userDropdown').classList.toggle('show');
+    }
+
+    function toggleMobileMenu() {
+        document.getElementById('navbarMenu').classList.toggle('show');
+    }
+
+    function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown')) {
+            document.getElementById('userDropdown').classList.remove('show');
+        }
+    });
+</script>

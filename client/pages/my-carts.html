@@ -6,6 +6,7 @@
     <title>My Carts - ShareCart</title>
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../js/navbar.js"></script>
     <style>
         .tabs {
             display: flex;
@@ -116,26 +117,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="dashboard.html" class="logo">
-                <i class="fas fa-shopping-cart"></i> ShareCart
-            </a>
-            <ul class="nav-links">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="browse-carts.html">Browse Carts</a></li>
-                <li><a href="my-carts.html" class="active">My Carts</a></li>
-                <li><a href="orders.html">Orders</a></li>
-                <li><a href="profile.html">Profile</a></li>
-            </ul>
-            <div class="user-menu">
-                <span id="userName">User</span>
-                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar" class="avatar" id="userAvatar">
-                <button class="btn btn-outline" onclick="api.logout()">Logout</button>
-            </div>
-        </div>
-    </nav>
+
 
     <div class="container">
         <div class="page-header">
@@ -202,9 +184,25 @@
             try {
                 const response = await api.getMyCarts();
                 const carts = response.data;
+                
+                console.log('All carts:', carts);
+                console.log('Current user ID:', user._id);
 
-                createdCarts = carts.filter(c => c.creator && c.creator._id === user._id);
-                joinedCarts = carts.filter(c => c.creator && c.creator._id !== user._id);
+                // Filter carts - check both creator._id and creator (in case it's just an ID string)
+                createdCarts = carts.filter(c => {
+                    if (!c.creator) return false;
+                    const creatorId = typeof c.creator === 'object' ? c.creator._id : c.creator;
+                    return creatorId === user._id || creatorId.toString() === user._id.toString();
+                });
+                
+                joinedCarts = carts.filter(c => {
+                    if (!c.creator) return false;
+                    const creatorId = typeof c.creator === 'object' ? c.creator._id : c.creator;
+                    return creatorId !== user._id && creatorId.toString() !== user._id.toString();
+                });
+
+                console.log('Created carts:', createdCarts);
+                console.log('Joined carts:', joinedCarts);
 
                 renderCreatedCarts();
                 renderJoinedCarts();

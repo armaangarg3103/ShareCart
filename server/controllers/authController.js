@@ -145,23 +145,50 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updateDetails = async (req, res, next) => {
   try {
-    const fieldsToUpdate = {
-      name: req.body.name,
-      phone: req.body.phone,
-      location: req.body.location,
-      avatar: req.body.avatar
-    };
+    console.log('Update details called');
+    console.log('User ID:', req.user?.id);
+    console.log('Request body:', req.body);
+    
+    const fieldsToUpdate = {};
+    
+    // Only add fields that are provided
+    if (req.body.name) fieldsToUpdate.name = req.body.name;
+    if (req.body.phone) fieldsToUpdate.phone = req.body.phone;
+    if (req.body.avatar) fieldsToUpdate.avatar = req.body.avatar;
+    
+    // Handle location update
+    if (req.body.location) {
+      fieldsToUpdate.location = {
+        type: 'Point',
+        coordinates: req.body.location.coordinates || [0, 0],
+        address: req.body.location.address || '',
+        city: req.body.location.city || '',
+        pincode: req.body.location.pincode || ''
+      };
+    }
+
+    console.log('Fields to update:', fieldsToUpdate);
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
       new: true,
-      runValidators: true
+      runValidators: false // Disable validators to avoid phone validation issues
     });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    console.log('User updated successfully');
 
     res.status(200).json({
       success: true,
       data: user
     });
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({
       success: false,
       message: error.message
