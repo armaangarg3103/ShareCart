@@ -900,6 +900,11 @@
         function init() {
             loadItems();
             updateCartUI();
+            // If cart modal is open, refresh its content so quantity change is visible there too
+            const myCartModal = document.getElementById('myCartModal');
+            if (myCartModal && myCartModal.classList.contains('active')) {
+                openMyCart();
+            }
         }
 
         function loadItems() {
@@ -961,6 +966,11 @@
             }
             loadItems();
             updateCartUI();
+            // Refresh modal if open so UI stays in sync with myCart
+            const myCartModal2 = document.getElementById('myCartModal');
+            if (myCartModal2 && myCartModal2.classList.contains('active')) {
+                openMyCart();
+            }
             showToast(`${item.name} added to cart`, 'success');
         }
 
