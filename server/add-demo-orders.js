@@ -51,8 +51,7 @@ async function addDemoOrders() {
                 cartName: 'Quick Snacks - In Transit',
                 items: [
                     { name: 'Maggi Noodles 4-Pack', price: 56, quantity: 2, user: user._id },
-                    { name: "Haldiram's Bhujia", price: 40, quantity: 3, user: user._id },
-                    { name: 'Red Bull Energy Drink', price: 120, quantity: 1, user: user._id }
+                    { name: "Haldiram's Bhujia", price: 40, quantity: 3, user: user._id }
                 ],
                 totalAmount: 352,
                 deliveryCharge: 0,
