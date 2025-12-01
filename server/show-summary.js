@@ -3,7 +3,8 @@ const Cart = require('./models/Cart');
 const Order = require('./models/Order');
 const User = require('./models/User');
 
-mongoose.connect('mongodb://localhost:27017/sharecart')
+require('dotenv').config();
+mongoose.connect(process.env.MONGODB_URI)
     .then(async () => {
         const rahul = await User.findOne({ email: 'rahul@gmail.com' });
         

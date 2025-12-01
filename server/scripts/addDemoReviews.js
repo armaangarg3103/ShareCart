@@ -4,7 +4,8 @@ const Order = require('../models/Order');
 const Review = require('../models/Review');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/sharecart', {
+require('dotenv').config();
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });

@@ -1,6 +1,6 @@
-// API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
-const SOCKET_URL = 'http://localhost:5000';
+// API Configuration - Now loaded from config.js
+const API_BASE_URL = CONFIG.API_BASE_URL;
+const SOCKET_URL = CONFIG.SOCKET_URL;
 
 // API Client
 class APIClient {

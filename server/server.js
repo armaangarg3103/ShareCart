@@ -29,7 +29,7 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL, 'http://localhost:3000'] : 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -44,7 +44,7 @@ socketHandler(io);
 // Middleware
 app.use(helmet()); // Security headers
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL, 'http://localhost:3000'] : 'http://localhost:3000',
   credentials: true
 }));
 app.use(compression()); // Compress responses
