@@ -690,12 +690,12 @@
                     id: 'demo-2',
                     platform: 'zepto',
                     items: [
-                        { name: 'Rice (5kg)', quantity: 1, price: 300, category: 'Groceries' },
                         { name: 'Dal (1kg)', quantity: 1, price: 120, category: 'Groceries' },
-                        { name: 'Oil (1L)', quantity: 1, price: 180, category: 'Groceries' }
+                        { name: 'Sugar (1kg)', quantity: 1, price: 45, category: 'Groceries' },
+                        { name: 'Salt (1kg)', quantity: 1, price: 25, category: 'Groceries' }
                     ],
-                    currentTotal: 600,
-                    remaining: 0,
+                    currentTotal: 190,
+                    remaining: 60,
                     distance: 1.2,
                     user: { name: 'Rahul Verma', location: { area: 'Indiranagar', city: 'Bangalore' } },
                     members: [
@@ -728,12 +728,12 @@
                     id: 'demo-4',
                     platform: 'bigbasket',
                     items: [
-                        { name: 'Atta (5kg)', quantity: 1, price: 250, category: 'Groceries' },
-                        { name: 'Sugar (1kg)', quantity: 1, price: 50, category: 'Groceries' },
-                        { name: 'Tea (250g)', quantity: 1, price: 180, category: 'Beverages' }
+                        { name: 'Atta (2kg)', quantity: 1, price: 100, category: 'Groceries' },
+                        { name: 'Sugar (1kg)', quantity: 1, price: 45, category: 'Groceries' },
+                        { name: 'Tea (100g)', quantity: 1, price: 75, category: 'Beverages' }
                     ],
-                    currentTotal: 480,
-                    remaining: 0,
+                    currentTotal: 220,
+                    remaining: 30,
                     distance: 1.5,
                     user: { name: 'Amit Kumar', location: { area: 'HSR Layout', city: 'Bangalore' } },
                     members: [
@@ -750,11 +750,11 @@
                     platform: 'blinkit',
                     items: [
                         { name: 'Bananas (1 dozen)', quantity: 1, price: 60, category: 'Fruits' },
-                        { name: 'Apples (1kg)', quantity: 1, price: 180, category: 'Fruits' },
-                        { name: 'Oranges (1kg)', quantity: 1, price: 120, category: 'Fruits' }
+                        { name: 'Apples (500g)', quantity: 1, price: 90, category: 'Fruits' },
+                        { name: 'Oranges (500g)', quantity: 1, price: 60, category: 'Fruits' }
                     ],
-                    currentTotal: 360,
-                    remaining: 0,
+                    currentTotal: 210,
+                    remaining: 40,
                     distance: 2.1,
                     user: { name: 'Ananya Singh', location: { area: 'Jayanagar', city: 'Bangalore' } },
                     members: [{ user: { name: 'Ananya Singh' } }],
@@ -783,11 +783,12 @@
                     id: 'demo-7',
                     platform: 'swiggy',
                     items: [
-                        { name: 'Chicken (1kg)', quantity: 1, price: 280, category: 'Meat' },
-                        { name: 'Fish (500g)', quantity: 1, price: 350, category: 'Seafood' }
+                        { name: 'Chicken (500g)', quantity: 1, price: 140, category: 'Meat' },
+                        { name: 'Eggs (6)', quantity: 1, price: 45, category: 'Dairy' },
+                        { name: 'Paneer (200g)', quantity: 1, price: 60, category: 'Dairy' }
                     ],
-                    currentTotal: 630,
-                    remaining: 0,
+                    currentTotal: 245,
+                    remaining: 5,
                     distance: 1.0,
                     user: { name: 'Meera Iyer', location: { area: 'Marathahalli', city: 'Bangalore' } },
                     members: [
@@ -802,12 +803,12 @@
                     id: 'demo-8',
                     platform: 'bigbasket',
                     items: [
-                        { name: 'Detergent (1kg)', quantity: 1, price: 180, category: 'Household' },
-                        { name: 'Soap (3 pack)', quantity: 1, price: 90, category: 'Household' },
-                        { name: 'Shampoo (200ml)', quantity: 1, price: 150, category: 'Personal Care' }
+                        { name: 'Detergent (500g)', quantity: 1, price: 90, category: 'Household' },
+                        { name: 'Soap (2 pack)', quantity: 1, price: 60, category: 'Household' },
+                        { name: 'Toothpaste', quantity: 1, price: 80, category: 'Personal Care' }
                     ],
-                    currentTotal: 420,
-                    remaining: 0,
+                    currentTotal: 230,
+                    remaining: 20,
                     distance: 0.9,
                     user: { name: 'Arjun Mehta', location: { area: 'Electronic City', city: 'Bangalore' } },
                     members: [{ user: { name: 'Arjun Mehta' } }],
@@ -1034,7 +1035,7 @@
         async function addToSharedCart(cartId) {
             // Check if it's a demo cart
             if (cartId && cartId.toString().startsWith('demo-')) {
-                showToast('Feature coming soon! Start shopping to create your own cart.', 'info');
+                showToast('Joined cart successfully! Redirecting to shop...', 'success');
                 setTimeout(() => {
                     window.location.href = 'shop.html';
                 }, 1500);
