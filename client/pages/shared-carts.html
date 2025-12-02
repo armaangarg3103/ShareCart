@@ -367,7 +367,8 @@
                 // Clear the localStorage cart after successful sharing
                 localStorage.removeItem('myShoppingCart');
                 
-                loadSharedCarts();
+                // Reload carts to show the newly created cart
+                await loadSharedCarts();
             } catch (error) {
                 console.error('Error sharing cart:', error);
                 const errorMsg = error.response?.data?.message || error.message || 'Failed to share cart';
@@ -387,17 +388,37 @@
             `;
             
             let allCarts = [];
+            let apiCarts = [];
             
             try {
-                // Fetch real carts from backend API
+                // Fetch real carts from backend API (excludes user's own carts)
                 const response = await api.getCarts();
                 console.log('Shared carts response:', response);
-                let sharedCarts = response.data || [];
+                apiCarts = response.data || [];
                 
-                // Add mySharedCart if it exists
-                allCarts = [...sharedCarts];
-                if (mySharedCart) {
-                    allCarts.unshift(mySharedCart);
+                // Also fetch user's own carts
+                try {
+                    const myCartsResponse = await api.getMyCarts();
+                    console.log('My carts response:', myCartsResponse);
+                    const myCarts = myCartsResponse.data || [];
+                    
+                    // Mark user's carts as "isMyCart"
+                    const myCartsMarked = myCarts.map(cart => ({
+                        ...cart,
+                        isMyCart: true
+                    }));
+                    
+                    // Combine: my carts first, then other carts
+                    allCarts = [...myCartsMarked, ...apiCarts];
+                } catch (myCartsError) {
+                    console.error('Error loading my carts:', myCartsError);
+                    // If fetching my carts fails, just use other carts
+                    allCarts = [...apiCarts];
+                    
+                    // Add mySharedCart if it exists (fallback)
+                    if (mySharedCart) {
+                        allCarts.unshift(mySharedCart);
+                    }
                 }
                 
                 // Calculate cart totals and format data
