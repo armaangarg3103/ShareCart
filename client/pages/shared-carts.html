@@ -36,6 +36,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 24px;
             transition: all 0.3s;
+            position: relative;
         }
 
         .cart-card:hover {
@@ -651,6 +652,69 @@
             loadSharedCarts();
         }
 
+        // Generate demo carts for display when no real carts exist
+        function generateDemoCarts() {
+            const demoUsers = [
+                { name: 'Priya Sharma', area: 'Koramangala', city: 'Bangalore' },
+                { name: 'Rahul Verma', area: 'Indiranagar', city: 'Bangalore' },
+                { name: 'Sneha Patel', area: 'Whitefield', city: 'Bangalore' },
+                { name: 'Amit Kumar', area: 'HSR Layout', city: 'Bangalore' },
+                { name: 'Ananya Singh', area: 'Jayanagar', city: 'Bangalore' }
+            ];
+
+            const demoItems = [
+                { name: 'Milk (1L)', quantity: 2, price: 30, category: 'Dairy' },
+                { name: 'Bread', quantity: 1, price: 25, category: 'Bakery' },
+                { name: 'Eggs (12)', quantity: 1, price: 80, category: 'Dairy' },
+                { name: 'Tomatoes (500g)', quantity: 1, price: 35, category: 'Vegetables' },
+                { name: 'Onions (1kg)', quantity: 1, price: 40, category: 'Vegetables' },
+                { name: 'Rice (5kg)', quantity: 1, price: 300, category: 'Groceries' },
+                { name: 'Atta (5kg)', quantity: 1, price: 250, category: 'Groceries' },
+                { name: 'Dal (1kg)', quantity: 1, price: 120, category: 'Groceries' }
+            ];
+
+            const platforms = ['blinkit', 'zepto', 'swiggy', 'bigbasket'];
+
+            return demoUsers.map((user, index) => {
+                const itemCount = Math.floor(Math.random() * 4) + 2; // 2-5 items
+                const selectedItems = [];
+                const usedIndices = new Set();
+                
+                for (let i = 0; i < itemCount; i++) {
+                    let randomIndex;
+                    do {
+                        randomIndex = Math.floor(Math.random() * demoItems.length);
+                    } while (usedIndices.has(randomIndex));
+                    usedIndices.add(randomIndex);
+                    selectedItems.push({ ...demoItems[randomIndex] });
+                }
+
+                const itemsTotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const remaining = 250 - itemsTotal;
+
+                return {
+                    _id: `demo-${index}`,
+                    id: `demo-${index}`,
+                    platform: platforms[index % platforms.length],
+                    items: selectedItems,
+                    currentTotal: itemsTotal,
+                    remaining: remaining > 0 ? remaining : 0,
+                    distance: (Math.random() * 2 + 0.5).toFixed(1),
+                    user: {
+                        name: user.name,
+                        location: {
+                            area: user.area,
+                            city: user.city
+                        }
+                    },
+                    members: [{ user: { name: user.name } }],
+                    maxMembers: 4,
+                    deliveryCharge: 50,
+                    isDemo: true
+                };
+            });
+        }
+
         async function shareMyCart(cartItems) {
             const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const remaining = 250 - total;
@@ -829,20 +893,12 @@
                 // Update results info
                 updateResultsInfo(allCarts.length, totalCarts);
 
-                // Render carts
+                // If no carts found, show demo carts
                 if (allCarts.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-shopping-cart"></i>
-                            <h2>No Shared Carts Nearby</h2>
-                            <p>Be the first to share your cart and let others join!</p>
-                            <button class="btn btn-primary" onclick="window.location.href='shop.html'">
-                                <i class="fas fa-store"></i> Start Shopping
-                            </button>
-                        </div>
-                    `;
-                    document.getElementById('paginationContainer').innerHTML = '';
-                    return;
+                    allCarts = generateDemoCarts();
+                    totalCarts = allCarts.length;
+                    updateResultsInfo(allCarts.length, totalCarts);
+                    showToast('Showing demo carts. Share your cart to see real ones!', 'info');
                 }
 
                 container.innerHTML = allCarts.map(cart => {
@@ -851,7 +907,8 @@
                     const isMyCart = cart.isMyCart;
 
                     return `
-                        <div class="cart-card ${isMyCart ? 'my-shared-cart' : ''}">
+                        <div class="cart-card ${isMyCart ? 'my-shared-cart' : ''}${cart.isDemo ? ' demo-cart' : ''}">
+                            ${cart.isDemo ? '<div style="position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">📋 DEMO</div>' : ''}
                             <div class="cart-header">
                                 <div class="user-info">
                                     <div class="user-avatar">
@@ -928,106 +985,17 @@
                 document.getElementById('paginationContainer').innerHTML = '';
             }
         }
-                // Render the carts
-                if (allCarts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-shopping-cart"></i>
-                        <h2>No Shared Carts Nearby</h2>
-                        <p>Be the first to share your cart and let others join!</p>
-                        <button class="btn btn-primary" onclick="window.location.href='shop.html'">
-                            <i class="fas fa-store"></i> Start Shopping
-                        </button>
-                    </div>
-                `;
+
+        async function addToSharedCart(cartId) {
+            // Check if it's a demo cart
+            if (cartId && cartId.toString().startsWith('demo-')) {
+                showToast('This is a demo cart. Share your own cart to join real carts!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'shop.html';
+                }, 2000);
                 return;
             }
 
-            container.innerHTML = allCarts.map(cart => {
-                const percentage = (cart.currentTotal / 250) * 100;
-                const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-                const isMyCart = cart.isMyCart;
-
-                return `
-                    <div class="cart-card ${isMyCart ? 'my-shared-cart' : ''}">
-                        <div class="cart-header">
-                            <div class="user-info">
-                                <div class="user-avatar">
-                                    ${isMyCart ? '👤' : (cart.user?.name || 'U').charAt(0)}
-                                </div>
-                                <div class="user-details">
-                                    <h3>${cart.user?.name || 'Unknown User'}${isMyCart ? ' (Your Cart)' : ''}</h3>
-                                    <p><i class="fas fa-map-marker-alt"></i> ${cart.user?.location?.area || 'Location not set'}</p>
-                                </div>
-                            </div>
-                            <div class="distance-badge">
-                                <i class="fas fa-location-arrow"></i> ${cart.distance || 0} km
-                            </div>
-                        </div>
-
-                        <div class="cart-progress">
-                            <div class="progress-info">
-                                <span>Current: ₹${cart.currentTotal}</span>
-                                <span>Need: ₹${cart.remaining} more</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${percentage}%"></div>
-                            </div>
-                        </div>
-
-                        <div class="cart-items-preview">
-                            <div class="items-count">
-                                <i class="fas fa-shopping-basket"></i>
-                                <span>${itemCount} items • ${cart.items.length} unique products</span>
-                            </div>
-                            <div style="margin-top: 12px; padding-left: 12px;">
-                                ${cart.items.slice(0, 3).map(item => 
-                                    `<div style="font-size: 14px; color: ${isMyCart ? 'rgba(255,255,255,0.9)' : 'var(--gray)'}; margin: 4px 0;">
-                                        • ${item.name} × ${item.quantity}
-                                    </div>`
-                                ).join('')}
-                                ${cart.items.length > 3 ? `<div style="font-size: 14px; color: ${isMyCart ? 'rgba(255,255,255,0.7)' : 'var(--gray)'}; margin: 4px 0;">+ ${cart.items.length - 3} more items</div>` : ''}
-                            </div>
-                        </div>
-
-                        ${isMyCart ? `
-                            <div class="cart-footer">
-                                <button class="btn btn-outline btn-full" style="color: white; border-color: white;" onclick="stopSharing()">
-                                    <i class="fas fa-times"></i> Stop Sharing
-                                </button>
-                            </div>
-                        ` : `
-                            <div class="cart-footer">
-                                <button class="btn-add-items" onclick="addToSharedCart('${cart._id || cart.id}')">
-                                    <i class="fas fa-plus-circle"></i> Add My Items & Complete Order
-                                </button>
-                            </div>
-                        `}
-                    </div>
-                `;
-                }).join('');
-
-                // Render pagination
-                renderPagination();
-
-            } catch (error) {
-                console.error('Error loading shared carts:', error);
-                showToast('Failed to load carts. Please try again.', 'error');
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <h2>Error Loading Carts</h2>
-                        <p>${error.message}</p>
-                        <button class="btn btn-primary" onclick="loadSharedCarts()">
-                            <i class="fas fa-redo"></i> Try Again
-                        </button>
-                    </div>
-                `;
-                document.getElementById('paginationContainer').innerHTML = '';
-            }
-        }
-
-        async function addToSharedCart(cartId) {
             // Confirm joining the cart
             if (!confirm('Join this shared cart? You can add your items to help complete the order and split delivery charges.')) {
                 return;

@@ -1307,7 +1307,13 @@
             
             // Save cart to localStorage and redirect to shared carts page
             localStorage.setItem('myShoppingCart', JSON.stringify(myCart));
-            window.location.href = 'shared-carts.html?action=share';
+            showToast('Redirecting to share your cart...', 'success');
+            
+            // Close cart modal and redirect after a short delay
+            closeMyCart();
+            setTimeout(() => {
+                window.location.href = 'shared-carts.html?action=share';
+            }, 1000);
         }
 
         function proceedToCheckout() {
