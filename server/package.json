@@ -10,6 +10,7 @@
     "init-db": "node scripts/init-db.js",
     "db-status": "node scripts/db-status.js",
     "test-api": "node scripts/test-api.js",
+    "fix-carts": "node scripts/fixCarts.js",
     "frontend": "node frontend-server.js"
   },
   "keywords": ["cart-sharing", "delivery", "split-payments"],

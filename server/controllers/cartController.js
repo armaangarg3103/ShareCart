@@ -21,42 +21,63 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 // @access  Private
 exports.getCarts = async (req, res, next) => {
   try {
-    const { platform, maxDistance, city } = req.query;
+    const { 
+      platform, 
+      maxDistance, 
+      city, 
+      status,
+      sortBy = 'distance',
+      page = 1, 
+      limit = 10,
+      minItems,
+      maxItems
+    } = req.query;
+    
     const userLocation = req.user.location.coordinates;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build query
     let query = {
-      status: { $in: ['active', 'full'] },
+      status: status ? status : { $in: ['active', 'full'] },
       isPublic: true,
       expiresAt: { $gt: new Date() },
       creator: { $ne: req.user.id }
     };
 
     // Filter by platform
-    if (platform) {
+    if (platform && platform !== 'all') {
       query.platform = platform.toLowerCase();
     }
 
     // Filter by city
-    if (city) {
+    if (city && city !== 'all') {
       query['location.city'] = city;
     }
 
-    // Get carts
+    // Filter by item count
+    if (minItems) {
+      query['items'] = { $exists: true };
+    }
+
+    // Get total count for pagination
+    const totalCarts = await Cart.countDocuments(query);
+
+    // Get carts with pagination
     let carts = await Cart.find(query)
       .populate('creator', 'name avatar rating phone')
       .populate('members.user', 'name avatar rating')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(parseInt(limit) * 3) // Get more to filter by distance
+      .lean();
 
-    // Calculate distance and filter
+    // Calculate distance and add to each cart
     carts = carts.map(cart => {
       const distance = calculateDistance(
         userLocation[1], userLocation[0],
         cart.location.coordinates[1], cart.location.coordinates[0]
       );
       return {
-        ...cart.toObject(),
+        ...cart,
         distance: Math.round(distance * 10) / 10
       };
     });
@@ -68,15 +89,48 @@ exports.getCarts = async (req, res, next) => {
       carts = carts.filter(cart => cart.distance <= cart.maxDistance);
     }
 
-    // Sort by distance
-    carts.sort((a, b) => a.distance - b.distance);
+    // Filter by item count range
+    if (minItems || maxItems) {
+      carts = carts.filter(cart => {
+        const itemCount = (cart.items || []).length;
+        if (minItems && itemCount < parseInt(minItems)) return false;
+        if (maxItems && itemCount > parseInt(maxItems)) return false;
+        return true;
+      });
+    }
+
+    // Sort carts
+    switch(sortBy) {
+      case 'distance':
+        carts.sort((a, b) => a.distance - b.distance);
+        break;
+      case 'newest':
+        carts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case 'members':
+        carts.sort((a, b) => (b.members?.length || 0) - (a.members?.length || 0));
+        break;
+      case 'items':
+        carts.sort((a, b) => (b.items?.length || 0) - (a.items?.length || 0));
+        break;
+      default:
+        carts.sort((a, b) => a.distance - b.distance);
+    }
+
+    // Apply pagination after filtering
+    const totalFilteredCarts = carts.length;
+    const paginatedCarts = carts.slice(skip, skip + parseInt(limit));
 
     res.status(200).json({
       success: true,
-      count: carts.length,
-      data: carts
+      count: paginatedCarts.length,
+      total: totalFilteredCarts,
+      totalPages: Math.ceil(totalFilteredCarts / parseInt(limit)),
+      currentPage: parseInt(page),
+      data: paginatedCarts
     });
   } catch (error) {
+    console.error('Get carts error:', error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -130,13 +184,50 @@ exports.createCart = async (req, res, next) => {
     // Add user as creator
     req.body.creator = req.user.id;
     
+    // Ensure all required fields have defaults
+    const cartData = {
+      ...req.body,
+      creator: req.user.id,
+      items: req.body.items || [],
+      platform: req.body.platform || 'blinkit',
+      deliveryCharge: req.body.deliveryCharge || 50,
+      maxMembers: req.body.maxMembers || 4,
+      status: 'active',
+      isPublic: req.body.isPublic !== undefined ? req.body.isPublic : true,
+      maxDistance: req.body.maxDistance || 2,
+      chatEnabled: req.body.chatEnabled !== undefined ? req.body.chatEnabled : true,
+      totalOrders: 0,
+      expiresAt: req.body.expiresAt || new Date(Date.now() + 2 * 60 * 60 * 1000)
+    };
+
+    // Ensure location has all required fields
+    if (cartData.location) {
+      cartData.location = {
+        type: 'Point',
+        coordinates: cartData.location.coordinates || req.user.location.coordinates,
+        address: cartData.location.address || req.user.location.address || 'Not specified',
+        city: cartData.location.city || req.user.location.city || 'Not specified',
+        pincode: cartData.location.pincode || req.user.location.pincode || '000000'
+      };
+    } else if (req.user.location) {
+      cartData.location = {
+        type: 'Point',
+        coordinates: req.user.location.coordinates,
+        address: req.user.location.address || 'Not specified',
+        city: req.user.location.city || 'Not specified',
+        pincode: req.user.location.pincode || '000000'
+      };
+    }
+    
     // Add creator as first member
-    req.body.members = [{
+    cartData.members = [{
       user: req.user.id,
-      splitAmount: req.body.deliveryCharge
+      joinedAt: new Date(),
+      status: 'joined',
+      splitAmount: cartData.deliveryCharge
     }];
 
-    const cart = await Cart.create(req.body);
+    const cart = await Cart.create(cartData);
 
     const populatedCart = await Cart.findById(cart._id)
       .populate('creator', 'name avatar rating phone')
@@ -152,6 +243,7 @@ exports.createCart = async (req, res, next) => {
       data: populatedCart
     });
   } catch (error) {
+    console.error('Create cart error:', error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -317,7 +409,44 @@ exports.updateCart = async (req, res, next) => {
       });
     }
 
-    cart = await Cart.findByIdAndUpdate(req.params.id, req.body, {
+    // Prepare update data with defaults
+    const updateData = { ...req.body };
+
+    // Ensure location has all required fields if being updated
+    if (updateData.location && updateData.location.coordinates) {
+      updateData.location = {
+        type: 'Point',
+        coordinates: updateData.location.coordinates,
+        address: updateData.location.address || cart.location.address || 'Not specified',
+        city: updateData.location.city || cart.location.city || 'Not specified',
+        pincode: updateData.location.pincode || cart.location.pincode || '000000'
+      };
+    }
+
+    // If items are being updated, ensure they have proper structure
+    if (updateData.items && Array.isArray(updateData.items)) {
+      updateData.items = updateData.items.map(item => ({
+        name: item.name || 'Unknown Item',
+        quantity: item.quantity || 1,
+        price: item.price || 0,
+        image: item.image || '',
+        category: item.category || ''
+      }));
+    }
+
+    // If members are being updated, ensure proper structure
+    if (updateData.members && Array.isArray(updateData.members)) {
+      const memberCount = updateData.members.length;
+      const splitAmount = Math.ceil((updateData.deliveryCharge || cart.deliveryCharge) / memberCount);
+      updateData.members = updateData.members.map(member => ({
+        user: member.user,
+        joinedAt: member.joinedAt || new Date(),
+        status: member.status || 'joined',
+        splitAmount: splitAmount
+      }));
+    }
+
+    cart = await Cart.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true
     }).populate('creator', 'name avatar rating phone')
@@ -333,6 +462,7 @@ exports.updateCart = async (req, res, next) => {
       data: cart
     });
   } catch (error) {
+    console.error('Update cart error:', error);
     res.status(500).json({
       success: false,
       message: error.message
