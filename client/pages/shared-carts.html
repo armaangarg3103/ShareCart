@@ -667,65 +667,162 @@
 
         // Generate demo carts for display when no real carts exist
         function generateDemoCarts() {
-            const demoUsers = [
-                { name: 'Priya Sharma', area: 'Koramangala', city: 'Bangalore' },
-                { name: 'Rahul Verma', area: 'Indiranagar', city: 'Bangalore' },
-                { name: 'Sneha Patel', area: 'Whitefield', city: 'Bangalore' },
-                { name: 'Amit Kumar', area: 'HSR Layout', city: 'Bangalore' },
-                { name: 'Ananya Singh', area: 'Jayanagar', city: 'Bangalore' }
-            ];
-
-            const demoItems = [
-                { name: 'Milk (1L)', quantity: 2, price: 30, category: 'Dairy' },
-                { name: 'Bread', quantity: 1, price: 25, category: 'Bakery' },
-                { name: 'Eggs (12)', quantity: 1, price: 80, category: 'Dairy' },
-                { name: 'Tomatoes (500g)', quantity: 1, price: 35, category: 'Vegetables' },
-                { name: 'Onions (1kg)', quantity: 1, price: 40, category: 'Vegetables' },
-                { name: 'Rice (5kg)', quantity: 1, price: 300, category: 'Groceries' },
-                { name: 'Atta (5kg)', quantity: 1, price: 250, category: 'Groceries' },
-                { name: 'Dal (1kg)', quantity: 1, price: 120, category: 'Groceries' }
-            ];
-
-            const platforms = ['blinkit', 'zepto', 'swiggy', 'bigbasket'];
-
-            return demoUsers.map((user, index) => {
-                const itemCount = Math.floor(Math.random() * 4) + 2; // 2-5 items
-                const selectedItems = [];
-                const usedIndices = new Set();
-                
-                for (let i = 0; i < itemCount; i++) {
-                    let randomIndex;
-                    do {
-                        randomIndex = Math.floor(Math.random() * demoItems.length);
-                    } while (usedIndices.has(randomIndex));
-                    usedIndices.add(randomIndex);
-                    selectedItems.push({ ...demoItems[randomIndex] });
-                }
-
-                const itemsTotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const remaining = 250 - itemsTotal;
-
-                return {
-                    _id: `demo-${index}`,
-                    id: `demo-${index}`,
-                    platform: platforms[index % platforms.length],
-                    items: selectedItems,
-                    currentTotal: itemsTotal,
-                    remaining: remaining > 0 ? remaining : 0,
-                    distance: (Math.random() * 2 + 0.5).toFixed(1),
-                    user: {
-                        name: user.name,
-                        location: {
-                            area: user.area,
-                            city: user.city
-                        }
-                    },
-                    members: [{ user: { name: user.name } }],
+            return [
+                {
+                    _id: 'demo-1',
+                    id: 'demo-1',
+                    platform: 'blinkit',
+                    items: [
+                        { name: 'Milk (1L)', quantity: 2, price: 30, category: 'Dairy' },
+                        { name: 'Bread', quantity: 2, price: 25, category: 'Bakery' },
+                        { name: 'Eggs (12)', quantity: 1, price: 80, category: 'Dairy' }
+                    ],
+                    currentTotal: 190,
+                    remaining: 60,
+                    distance: 0.8,
+                    user: { name: 'Priya Sharma', location: { area: 'Koramangala', city: 'Bangalore' } },
+                    members: [{ user: { name: 'Priya Sharma' } }],
                     maxMembers: 4,
                     deliveryCharge: 50,
                     isDemo: true
-                };
-            });
+                },
+                {
+                    _id: 'demo-2',
+                    id: 'demo-2',
+                    platform: 'zepto',
+                    items: [
+                        { name: 'Rice (5kg)', quantity: 1, price: 300, category: 'Groceries' },
+                        { name: 'Dal (1kg)', quantity: 1, price: 120, category: 'Groceries' },
+                        { name: 'Oil (1L)', quantity: 1, price: 180, category: 'Groceries' }
+                    ],
+                    currentTotal: 600,
+                    remaining: 0,
+                    distance: 1.2,
+                    user: { name: 'Rahul Verma', location: { area: 'Indiranagar', city: 'Bangalore' } },
+                    members: [
+                        { user: { name: 'Rahul Verma' } },
+                        { user: { name: 'Sneha K' } }
+                    ],
+                    maxMembers: 4,
+                    deliveryCharge: 50,
+                    isDemo: true
+                },
+                {
+                    _id: 'demo-3',
+                    id: 'demo-3',
+                    platform: 'swiggy',
+                    items: [
+                        { name: 'Tomatoes (500g)', quantity: 2, price: 35, category: 'Vegetables' },
+                        { name: 'Onions (1kg)', quantity: 1, price: 40, category: 'Vegetables' },
+                        { name: 'Potatoes (1kg)', quantity: 1, price: 30, category: 'Vegetables' },
+                        { name: 'Coriander', quantity: 1, price: 10, category: 'Vegetables' }
+                    ],
+                    currentTotal: 150,
+                    remaining: 100,
+                    distance: 0.5,
+                    user: { name: 'Sneha Patel', location: { area: 'Whitefield', city: 'Bangalore' } },
+                    members: [{ user: { name: 'Sneha Patel' } }],
+                    maxMembers: 3,
+                    deliveryCharge: 50,
+                    isDemo: true
+                },
+                {
+                    _id: 'demo-4',
+                    id: 'demo-4',
+                    platform: 'bigbasket',
+                    items: [
+                        { name: 'Atta (5kg)', quantity: 1, price: 250, category: 'Groceries' },
+                        { name: 'Sugar (1kg)', quantity: 1, price: 50, category: 'Groceries' },
+                        { name: 'Tea (250g)', quantity: 1, price: 180, category: 'Beverages' }
+                    ],
+                    currentTotal: 480,
+                    remaining: 0,
+                    distance: 1.5,
+                    user: { name: 'Amit Kumar', location: { area: 'HSR Layout', city: 'Bangalore' } },
+                    members: [
+                        { user: { name: 'Amit Kumar' } },
+                        { user: { name: 'Neha M' } },
+                        { user: { name: 'Rajesh T' } }
+                    ],
+                    maxMembers: 4,
+                    deliveryCharge: 50,
+                    isDemo: true
+                },
+                {
+                    _id: 'demo-5',
+                    id: 'demo-5',
+                    platform: 'blinkit',
+                    items: [
+                        { name: 'Bananas (1 dozen)', quantity: 1, price: 60, category: 'Fruits' },
+                        { name: 'Apples (1kg)', quantity: 1, price: 180, category: 'Fruits' },
+                        { name: 'Oranges (1kg)', quantity: 1, price: 120, category: 'Fruits' }
+                    ],
+                    currentTotal: 360,
+                    remaining: 0,
+                    distance: 2.1,
+                    user: { name: 'Ananya Singh', location: { area: 'Jayanagar', city: 'Bangalore' } },
+                    members: [{ user: { name: 'Ananya Singh' } }],
+                    maxMembers: 4,
+                    deliveryCharge: 50,
+                    isDemo: true
+                },
+                {
+                    _id: 'demo-6',
+                    id: 'demo-6',
+                    platform: 'zepto',
+                    items: [
+                        { name: 'Butter (100g)', quantity: 2, price: 55, category: 'Dairy' },
+                        { name: 'Cheese (200g)', quantity: 1, price: 120, category: 'Dairy' },
+                        { name: 'Yogurt (400g)', quantity: 2, price: 40, category: 'Dairy' }
+                    ],
+                    currentTotal: 180,
+                    remaining: 70,
+                    distance: 1.8,
+                    user: { name: 'Vikram Reddy', location: { area: 'BTM Layout', city: 'Bangalore' } },
+                    members: [{ user: { name: 'Vikram Reddy' } }],
+                    maxMembers: 4,
+                    deliveryCharge: 50,
+                    isDemo: true
+                },
+                {
+                    _id: 'demo-7',
+                    id: 'demo-7',
+                    platform: 'swiggy',
+                    items: [
+                        { name: 'Chicken (1kg)', quantity: 1, price: 280, category: 'Meat' },
+                        { name: 'Fish (500g)', quantity: 1, price: 350, category: 'Seafood' }
+                    ],
+                    currentTotal: 630,
+                    remaining: 0,
+                    distance: 1.0,
+                    user: { name: 'Meera Iyer', location: { area: 'Marathahalli', city: 'Bangalore' } },
+                    members: [
+                        { user: { name: 'Meera Iyer' } },
+                        { user: { name: 'Karthik S' } }
+                    ],
+                    maxMembers: 3,
+                    deliveryCharge: 50,
+                    isDemo: true
+                },
+                {
+                    _id: 'demo-8',
+                    id: 'demo-8',
+                    platform: 'bigbasket',
+                    items: [
+                        { name: 'Detergent (1kg)', quantity: 1, price: 180, category: 'Household' },
+                        { name: 'Soap (3 pack)', quantity: 1, price: 90, category: 'Household' },
+                        { name: 'Shampoo (200ml)', quantity: 1, price: 150, category: 'Personal Care' }
+                    ],
+                    currentTotal: 420,
+                    remaining: 0,
+                    distance: 0.9,
+                    user: { name: 'Arjun Mehta', location: { area: 'Electronic City', city: 'Bangalore' } },
+                    members: [{ user: { name: 'Arjun Mehta' } }],
+                    maxMembers: 4,
+                    deliveryCharge: 50,
+                    isDemo: true
+                }
+            ];
         }
 
         async function shareMyCart(cartItems) {
