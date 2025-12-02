@@ -241,25 +241,53 @@
             loadSharedCarts();
         }
 
-        function shareMyCart(cartItems) {
+        async function shareMyCart(cartItems) {
             const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const remaining = 250 - total;
 
-            mySharedCart = {
-                id: 'my-cart',
-                user: {
-                    name: 'You',
-                    location: myLocation
-                },
-                items: cartItems,
-                currentTotal: total,
-                remaining: remaining,
-                distance: 0,
-                isMyCart: true
-            };
+            try {
+                // Prepare cart data for API
+                const cartData = {
+                    platform: 'blinkit', // Default platform, can be made dynamic
+                    location: myLocation,
+                    deliveryCharge: 50, // Default delivery charge
+                    maxMembers: 4,
+                    items: cartItems,
+                    notes: `Cart total: ₹${total}. Need ₹${remaining} more to reach minimum.`,
+                    isPublic: true,
+                    maxDistance: 5
+                };
 
-            showToast('Your cart is now shared! Others nearby can add items to help you reach ₹250.', 'success');
-            loadSharedCarts();
+                // Save cart to database via API
+                showToast('Creating shared cart...', 'info');
+                const response = await api.createCart(cartData);
+                console.log('Cart created:', response);
+
+                // Store the created cart
+                mySharedCart = {
+                    ...response.data,
+                    id: response.data._id,
+                    user: {
+                        name: 'You',
+                        location: myLocation
+                    },
+                    items: cartItems,
+                    currentTotal: total,
+                    remaining: remaining,
+                    distance: 0,
+                    isMyCart: true
+                };
+
+                showToast('Your cart is now shared! Others nearby can add items to help you reach ₹250.', 'success');
+                
+                // Clear the localStorage cart after successful sharing
+                localStorage.removeItem('myShoppingCart');
+                
+                loadSharedCarts();
+            } catch (error) {
+                console.error('Error sharing cart:', error);
+                showToast('Failed to share cart. Please try again.', 'error');
+            }
         }
 
         async function loadSharedCarts() {
