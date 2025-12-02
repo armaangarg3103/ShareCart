@@ -222,20 +222,29 @@
         let mySharedCart = null;
 
         async function init() {
-            // Get user location
+            // Get user location first (critical for cart creation)
             try {
                 const userData = await api.getMe();
                 myLocation = userData.data.location;
+                console.log('User location loaded:', myLocation);
             } catch (error) {
                 console.error('Error getting user data:', error);
+                // Provide default location if API fails
+                myLocation = {
+                    type: 'Point',
+                    coordinates: [72.8777, 19.0760],
+                    address: 'Not specified',
+                    city: 'Mumbai',
+                    pincode: '400001'
+                };
             }
 
-            // Check if user is sharing their cart
+            // Check if user is sharing their cart (after location is loaded)
             const urlParams = new URLSearchParams(window.location.search);
             const myCart = localStorage.getItem('myShoppingCart');
             
             if (urlParams.get('action') === 'share' && myCart) {
-                shareMyCart(JSON.parse(myCart));
+                await shareMyCart(JSON.parse(myCart));
             }
 
             loadSharedCarts();
@@ -245,23 +254,52 @@
             const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const remaining = 250 - total;
 
+            // Validate inputs
+            if (!cartItems || cartItems.length === 0) {
+                showToast('Your cart is empty! Add items first.', 'error');
+                return;
+            }
+
+            if (!myLocation) {
+                showToast('Unable to get your location. Please try again.', 'error');
+                return;
+            }
+
             try {
                 // Prepare cart data for API
                 const cartData = {
                     platform: 'blinkit', // Default platform, can be made dynamic
-                    location: myLocation,
+                    location: {
+                        type: myLocation.type || 'Point',
+                        coordinates: myLocation.coordinates || [72.8777, 19.0760],
+                        address: myLocation.address || 'Not specified',
+                        city: myLocation.city || 'Mumbai',
+                        pincode: myLocation.pincode || '400001'
+                    },
                     deliveryCharge: 50, // Default delivery charge
                     maxMembers: 4,
-                    items: cartItems,
+                    items: cartItems.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price,
+                        image: item.image || '',
+                        category: item.category || ''
+                    })),
                     notes: `Cart total: ₹${total}. Need ₹${remaining} more to reach minimum.`,
                     isPublic: true,
                     maxDistance: 5
                 };
 
+                console.log('Creating cart with data:', cartData);
+
                 // Save cart to database via API
                 showToast('Creating shared cart...', 'info');
                 const response = await api.createCart(cartData);
-                console.log('Cart created:', response);
+                console.log('Cart created successfully:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || 'Failed to create cart');
+                }
 
                 // Store the created cart
                 mySharedCart = {
@@ -278,7 +316,7 @@
                     isMyCart: true
                 };
 
-                showToast('Your cart is now shared! Others nearby can add items to help you reach ₹250.', 'success');
+                showToast('Your cart is now shared! Others nearby can join.', 'success');
                 
                 // Clear the localStorage cart after successful sharing
                 localStorage.removeItem('myShoppingCart');
@@ -286,7 +324,8 @@
                 loadSharedCarts();
             } catch (error) {
                 console.error('Error sharing cart:', error);
-                showToast('Failed to share cart. Please try again.', 'error');
+                const errorMsg = error.response?.data?.message || error.message || 'Failed to share cart';
+                showToast(errorMsg, 'error');
             }
         }
 

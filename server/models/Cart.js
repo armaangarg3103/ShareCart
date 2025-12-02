@@ -24,15 +24,15 @@ const cartSchema = new mongoose.Schema({
     },
     address: {
       type: String,
-      required: true
+      default: 'Not specified'
     },
     city: {
       type: String,
-      required: true
+      default: 'Not specified'
     },
     pincode: {
       type: String,
-      required: true
+      default: '000000'
     }
   },
   deliveryCharge: {
@@ -64,6 +64,30 @@ const cartSchema = new mongoose.Schema({
     splitAmount: {
       type: Number,
       default: 0
+    }
+  }],
+  items: [{
+    name: {
+      type: String,
+      required: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    image: {
+      type: String,
+      default: ''
+    },
+    category: {
+      type: String,
+      default: ''
     }
   }],
   status: {
